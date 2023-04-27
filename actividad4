@@ -1,0 +1,63 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# 1 - Importación de las librerias
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier
+from sklearn import tree
+
+# 2 - Lectura del dataset
+df = pd.read_csv('cleaned-data.csv')
+
+
+# 3 - Variables predcictoras y target
+X = df[['Fever', 'Tiredness', 'Dry-Cough', 'Difficulty-in-Breathing',
+       'Sore-Throat', 'None_Sympton', 'Pains', 'Nasal-Congestion',
+       'Runny-Nose', 'Diarrhea', 'None_Experiencing','Age_0-9','Age_10-19','Age_20-24','Age_25-59','Age_60+','Gender_Female','Gender_Male','Gender_Transgender']]
+
+# Variables target o a predecir
+y = df[['Severity_Moderate','Severity_Severe']]
+
+# 4 - Separación de datasers de entrenamiento y de prueba
+x_train,x_test,y_train,y_test = train_test_split(X,y,test_size=0.2,random_state=42)
+
+clf = DecisionTreeClassifier(criterion='entropy',random_state=42,max_depth=3,min_samples_leaf=5)
+
+clf.fit(x_train,y_train)
+
+# 5 - Predecir el modelo
+y_pred = clf.predict(x_test)
+
+# 6 Calculo la precisión del modelo
+from sklearn.metrics import accuracy_score
+exactitud = accuracy_score(y_test,y_pred)
+print(f'Exactitud del modelo: {exactitud}')
+
+# 7 - Importancia de las caracteristicas
+print("Feature importances:\n{}".format(clf.feature_importances_))
+
+# 8 - Exactitud del modelo
+exactitudTrain = clf.score(x_train,y_train)
+exactitudTest = clf.score(x_test,y_test)
+
+print(f'La exactitud de los datos de entrenamiento es de {exactitudTrain}')
+print(f'La exactitud de los datos de prueba es de {exactitudTest}')
+
+names =['Fever', 'Tiredness', 'Dry-Cough', 'Difficulty-in-Breathing',
+       'Sore-Throat', 'None_Sympton', 'Pains', 'Nasal-Congestion',
+       'Runny-Nose', 'Diarrhea', 'None_Experiencing','Age_0-9','Age_10-19','Age_20-24','Age_25-59','Age_60+','Gender_Female','Gender_Male','Gender_Transgender']
+
+# 9 - datos para graficar el grado de importancia de las variables o caracteristicas predictoras
+n_features = 19
+plt.barh(range(n_features), clf.feature_importances_, align='center')
+plt.yticks(np.arange(n_features), names)
+plt.xlabel("Feature importance")
+plt.ylabel("Feature")
+
+# 10 - Graficando el arbol de decisión
+fig = plt.figure(figsize=(25,20))
+tree.plot_tree(clf, filled = True, rounded = True, max_depth=3)
+plt.show()
